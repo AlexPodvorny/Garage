@@ -1,0 +1,15 @@
+# RULE 17 LogLog (action)
+MATCHED_RULE17='0'
+if [[ $ACTION_RECEIVED == "LogLog" ]]
+then
+ MATCHED_RULE17="1"
+fi
+
+
+# RULE 17 ACTIONS
+if [[ "$MATCHED_RULE17" == "1" ]]
+then
+
+#Action 17.1 (custom) 
+logread > /home/log_log
+fi

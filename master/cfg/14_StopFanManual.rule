@@ -1,0 +1,33 @@
+# RULE 14 Остановить вентилятор вручную (regex)
+MATCHED_RULE14='0'
+REGEX='CYCLE'
+if [[ $LINE =~ $REGEX ]]
+then
+ MATCHED_RULE14="1"
+fi
+
+
+# RULE 14 CONDITIONS
+#Condition 14.1 (var) 
+TEST_VARIABLE=`cat $DATA_PATH/Fan.dat`
+if [[ $TEST_VARIABLE -ne "1" ]]
+then
+ MATCHED_RULE14="0"
+fi
+
+#Condition 14.2 (var) 
+TEST_VARIABLE=`cat $DATA_PATH/Button.dat`
+if [[ $TEST_VARIABLE -ne "0" ]]
+then
+ MATCHED_RULE14="0"
+fi
+
+
+# RULE 14 ACTIONS
+if [[ "$MATCHED_RULE14" == "1" ]]
+then
+
+#Action 14.1 (action) 
+echo "Action added: StopFanManualFun"
+echo -n "StopFanManualFun">$DATA_PATH/incoming_action.txt
+fi

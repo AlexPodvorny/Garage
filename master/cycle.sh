@@ -74,6 +74,13 @@ while [ 1=1 ] ; do
 
 LINE="CYCLE"
 
+# сброс проверочного файла и очистка логов
+if [ -f $DATA_PATH/work_chk ]
+then
+rm $LOGFILE
+rm $DATA_PATH/work_chk
+fi
+
 echo "Cycle start" | write_log
 PASSED_TIME="$(($(date +%s)-START_TIME))"
 

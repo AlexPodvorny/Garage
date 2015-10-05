@@ -1,0 +1,17 @@
+# RULE 5 cfgThingspeak_Yes (action)
+MATCHED_RULE5='0'
+if [[ $ACTION_RECEIVED == "cfgThingspeak_Yes" ]]
+then
+ MATCHED_RULE5="1"
+fi
+
+
+# RULE 5 ACTIONS
+if [[ "$MATCHED_RULE5" == "1" ]]
+then
+
+#Action 5.1 (var) 
+echo "Updating variable: cfgThingspeak to Yes"
+SAVE_DATA="Yes"
+echo -n "$SAVE_DATA">$DATA_PATH/cfgThingspeak.dat
+fi

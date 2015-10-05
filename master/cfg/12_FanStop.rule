@@ -53,3 +53,4 @@ echo -n "$SAVE_DATA">$DATA_PATH/Hcycle.dat
 echo "Updating variable: Hpause to 1"
 SAVE_DATA="1"
 echo -n "$SAVE_DATA">$DATA_PATH/Hpause.dat
+fi

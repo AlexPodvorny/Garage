@@ -1,6 +1,6 @@
 #!/bin/bash
 
-LOG_FILE=/var/log/cycle
+LOGFILE=/var/log/cycle.log
 # Function to write to the Log file
 ###################################
 
@@ -11,13 +11,13 @@ write_log()
   	#LOGTIME=`date "+%Y-%m-%d %H:%M:%S"`
   	LOGTIME=`date "+%H:%M:%S"`
   	# If log file is not defined, just echo the output
-  	if [ "$LOG_FILE" == "" ]; then 
+  	if [ "$LOGFILE" == "" ]; then 
 	echo $LOGTIME": $text";
   	else
-    	LOG=$LOG_FILE"_"`date +%Y%m%d`
-	touch $LOG
-    	if [ ! -f $LOG ]; then echo "ERROR!! Cannot create log file $LOG. Exiting."; exit 1; fi
-	echo $LOGTIME": $text" | tee -a $LOG;
+    	# LOG=$LOG_FILE"_"`date +%Y%m%d`
+	touch $LOGFILE
+    	if [ ! -f $LOGFILE ]; then echo "ERROR!! Cannot create log file $LOGFILE. Exiting."; exit 1; fi
+	echo $LOGTIME": $text" | tee -a $LOGFILE;
   	fi
   done
 }
@@ -129,6 +129,14 @@ while [ 1=1 ] ; do
 #echo $LINE
 LINE="CYCLE"
 
+# сброс проверочного файла и очистка логов
+if [ -f $DATA_PATH/work_chk ]
+then
+  rm $LOGFILE
+  rm $DATA_PATH/work_chk
+fi
+
+
 echo "1" | write_log
 echo "Cycle"
 
@@ -153,6 +161,8 @@ DATA_COMMAND=""
 DATA_VALUE=""
 
 REGEX='^P:([0-9]+);F:([0-9]+);T:([0-9]+);C:([0-9]+);D:([0-9]+);$'
+
+
 
 # чтение датчиков
 . /etc/master/sensors.sh

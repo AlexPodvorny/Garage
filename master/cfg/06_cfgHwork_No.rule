@@ -25,17 +25,17 @@ echo 0 > /sys/class/gpio/gpio0/value
 echo 1 > /sys/class/gpio/gpio4/value
 
 #Action 6.5 (var) 
-echo "Updating variable: cfgHwork to 0"
+echo "Updating variable: cfgHwork to 0" | write_log
 SAVE_DATA="0"
 echo -n "$SAVE_DATA">$DATA_PATH/cfgHwork.dat
 
 #Action 6.6 (var) 
-echo "Updating variable: Hcycle to 0"
+echo "Updating variable: Hcycle to 0" | write_log
 SAVE_DATA="0"
 echo -n "$SAVE_DATA">$DATA_PATH/Hcycle.dat
 
 #Action 6.7 (var) 
-echo "Updating variable: Hpause to 0"
+echo "Updating variable: Hpause to 0" | write_log
 SAVE_DATA="0"
 echo -n "$SAVE_DATA">$DATA_PATH/Hpause.dat
 fi

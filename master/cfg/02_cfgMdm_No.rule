@@ -11,7 +11,7 @@ if [[ "$MATCHED_RULE2" == "1" ]]
 then
 
 #Action 2.1 (var) 
-echo "Updating variable: cfgMdm to No"
+echo "Updating variable: cfgMdm to No" | write_log
 SAVE_DATA="No"
 echo -n "$SAVE_DATA">$DATA_PATH/cfgMdm.dat
 fi

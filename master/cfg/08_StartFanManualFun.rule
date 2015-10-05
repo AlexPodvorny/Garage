@@ -26,7 +26,7 @@ echo 1 > /sys/class/gpio/gpio0/value
 echo 0 > /sys/class/gpio/gpio4/value
 
 #Action 8.3 (set_timer) 
-echo "Setting timer: StopFanManual"
+echo "Setting timer: StopFanManual" | write_log
 rm -f $DATA_PATH/StopFanManual-*.timer
 TIMEOUT="$(date +%s)"
 let TIMEOUT+=7200

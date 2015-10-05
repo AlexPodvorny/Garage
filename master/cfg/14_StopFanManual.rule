@@ -28,6 +28,6 @@ if [[ "$MATCHED_RULE14" == "1" ]]
 then
 
 #Action 14.1 (action) 
-echo "Action added: StopFanManualFun"
+echo "Action added: StopFanManualFun" | write_log
 echo -n "StopFanManualFun">$DATA_PATH/incoming_action.txt
 fi

@@ -17,17 +17,17 @@ echo 0 > /sys/class/gpio/gpio0/value
 echo 1 > /sys/class/gpio/gpio4/value
 
 #Action 10.3 (var) 
-echo "Updating variable: Hcycle to 0"
+echo "Updating variable: Hcycle to 0" | write_log
 SAVE_DATA="0"
 echo -n "$SAVE_DATA">$DATA_PATH/Hcycle.dat
 
 #Action 10.4 (var) 
-echo "Updating variable: Hpause to 1"
+echo "Updating variable: Hpause to 1" | write_log
 SAVE_DATA="1"
 echo -n "$SAVE_DATA">$DATA_PATH/Hpause.dat
 
 #Action 10.5 (set_timer) 
-echo "Setting timer: TimerHpause"
+echo "Setting timer: TimerHpause" | write_log
 rm -f $DATA_PATH/TimerHpause-*.timer
 TIMEOUT="$(date +%s)"
 let TIMEOUT+=300

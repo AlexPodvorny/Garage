@@ -31,7 +31,8 @@ fi
 
 #Condition 13.4 (var) 
 TEST_VARIABLE=`cat $DATA_PATH/HcellarI.dat`
-if [[ $TEST_VARIABLE -lt "95" ]]
+TEST_VALUE=`cat $DATA_PATH/cfgHstart.dat`
+if [[ $TEST_VARIABLE -lt $TEST_VALUE ]]
 then
  MATCHED_RULE13="0"
 fi
@@ -48,14 +49,14 @@ echo 1 > /sys/class/gpio/gpio0/value
 echo 0 > /sys/class/gpio/gpio4/value
 
 #Action 13.3 (set_timer) 
-echo "Setting timer: TimerHcycle"
+echo "Setting timer: TimerHcycle" | write_log
 rm -f $DATA_PATH/TimerHcycle-*.timer
 TIMEOUT="$(date +%s)"
 let TIMEOUT+=1200
 echo -n "TimerHcycleFun">$DATA_PATH/TimerHcycle-$TIMEOUT.timer
 
 #Action 13.4 (var) 
-echo "Updating variable: Hcycle to 1"
+echo "Updating variable: Hcycle to 1" | write_log
 SAVE_DATA="1"
 echo -n "$SAVE_DATA">$DATA_PATH/Hcycle.dat
 fi

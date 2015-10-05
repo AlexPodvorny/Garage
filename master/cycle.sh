@@ -14,10 +14,9 @@ write_log()
   	if [ "$LOG_FILE" == "" ]; then 
 	echo $LOGTIME": $text";
   	else
-    	LOG=$LOG_FILE"_"`date +%Y%m%d`
-	touch $LOG
-    	if [ ! -f $LOG ]; then echo "ERROR!! Cannot create log file $LOG. Exiting."; exit 1; fi
-	echo $LOGTIME": $text" | tee -a $LOG;
+	touch $LOG_FILE
+    	if [ ! -f $LOG_FILE ]; then echo "ERROR!! Cannot create log file $LOG_FILE. Exiting."; exit 1; fi
+	echo $LOGTIME": $text" | tee -a $LOG_FILE;
   	fi
   done
 }
@@ -41,6 +40,11 @@ do
 #---------------------------------------------------------------------------
 rm -f $DATA_PATH/*
 
+# Востановить конфигурацинные файлы
+cp $CFG_PATH/cfg*.dat $DATA_PATH/
+# инициализация переменных
+echo "0" > $DATA_PATH/Hcycle.dat
+echo "0" > $DATA_PATH/Hpause.dat
 # проверка GPIO
 if [ -f  /sys/class/gpio/gpio0/value ]
 then
@@ -77,7 +81,7 @@ LINE="CYCLE"
 # сброс проверочного файла и очистка логов
 if [ -f $DATA_PATH/work_chk ]
 then
-rm $LOGFILE
+rm $LOG_FILE
 rm $DATA_PATH/work_chk
 fi
 
@@ -98,8 +102,8 @@ echo "Sensors read" | write_log
 
 if [ -f $DATA_PATH/incoming_data.txt ];
 then
- echo "New incoming data:";
- echo `cat $DATA_PATH/incoming_data.txt`
+ echo "New incoming data:" | write_log
+ echo `cat $DATA_PATH/incoming_data.txt` | write_log
 #cat $DATA_PATH/incoming_data.txt>$ARDUINO_PORT
  rm -f $DATA_PATH/incoming_data.txt
 fi
@@ -108,7 +112,7 @@ ACTION_RECEIVED=""
 if [ -f $DATA_PATH/incoming_action.txt ];
 then
  ACTION_RECEIVED=`cat $DATA_PATH/incoming_action.txt`
- echo "New incoming action: $ACTION_RECEIVED"
+ echo "New incoming action: $ACTION_RECEIVED" | write_log
  rm -f $DATA_PATH/incoming_action.txt
 fi
 
@@ -117,14 +121,14 @@ RFILES=$CFG_PATH/*.rule
 for f in $RFILES
 do
  if [ -f $f -a -x $f ]
-  echo ${f##*/} | write_log
-  . $f
+ then
+    echo ${f##*/} | write_log
+    . $f
  fi
 done
 
 if [ -f $DATA_PATH/reboot ];
 then
-echo "REBOOT FLAG"
 echo "Reboot flag" | write_log
 rm -f $DATA_PATH/reboot
 break;
@@ -137,16 +141,16 @@ FILES=$DATA_PATH/cfg*.dat
 for f in $FILES
 do
  if [ $f -nt $CFG_PATH/${f##*/} ]; then 
-  echo "Copy $f ..."
+  echo "Copy $f ..." | write_log
   cp $f $CFG_PATH/
  fi
 done
-echo "6" | write_log
+
+echo "Cycle End" | write_log
 sleep 2 
 done
 
 done
 #---------------------------------------------------------------------------
 
-echo Cycle stopped.
 echo "Cycle stopped." | write_log

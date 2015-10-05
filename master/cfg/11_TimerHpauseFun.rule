@@ -1,0 +1,17 @@
+# RULE 11 TimerHpauseFun (action)
+MATCHED_RULE11='0'
+if [[ $ACTION_RECEIVED == "TimerHpauseFun" ]]
+then
+ MATCHED_RULE11="1"
+fi
+
+
+# RULE 11 ACTIONS
+if [[ "$MATCHED_RULE11" == "1" ]]
+then
+
+#Action 11.1 (var) 
+echo "Updating variable: Hpause to 0"
+SAVE_DATA="0"
+echo -n "$SAVE_DATA">$DATA_PATH/Hpause.dat
+fi

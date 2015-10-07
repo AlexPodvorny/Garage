@@ -17,7 +17,8 @@ fi
 
 #Condition 12.2 (var) 
 TEST_VARIABLE=`cat $DATA_PATH/HcellarI.dat`
-TEST_VALUE=`cat $DATA_PATH/cfgHstart.dat`
+TEST_S=`cat $DATA_PATH/cfgHstop.dat`
+TEST_VALUE=$(printf %.0f $TEST_S)
 if [[ $TEST_VARIABLE -gt $TEST_VALUE ]]
 then
  MATCHED_RULE12="0"

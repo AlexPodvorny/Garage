@@ -54,6 +54,7 @@ fi
 # - имя переменной температуры
 # - путь к файлу драйвера
 # - число попыток чтения до установки ошибки
+# - 5 - путь к файлу со значениями для усреднения
 function dht_read {
 
 if [ -f "$3" ]
@@ -64,8 +65,18 @@ then
   then
     hum=$(echo $rtemp | cut -f2 -d' ')
     tt=$(echo $rtemp | cut -f3 -d' ')
-    echo $(printf %.1f $hum) > $DATA_PATH/$1.dat
-    echo $(printf %.0f $hum) > $DATA_PATH/"$1"I.dat
+    # - усреднение 
+    echo $hum >> $DATA_PATH/$5.avg
+    SVAL=$(awk '{ s += $1 } END {printf "%0.1f %d", s/NR, NR}' $DATA_PATH/$5.avg)
+    AVG=$(echo $SVAL | cut -f1 -d' ')
+    NAVG=$(echo $SVAL | cut -f2 -d' ')
+    while [ $NAVG -ge "10" ]; do
+      sed -i '1d' $DATA_PATH/$5.avg
+      let NAVG=NAVG-1
+    done
+    #
+    echo $(printf %.1f $AVG) > $DATA_PATH/$1.dat
+    echo $(printf %.0f $AVG) > $DATA_PATH/"$1"I.dat
     echo "OK" > $DATA_PATH/"$1"_S.dat
     if [ -f "$DATA_PATH/$1.cnt" ]
     then

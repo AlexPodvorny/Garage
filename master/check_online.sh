@@ -1,5 +1,7 @@
 #!/bin/bash
 
+. /etc/master/settings.sh
+
 ONLINE_CHECK_HOST="8.8.8.8"
 VPN_CHECK_HOST="192.168.99.3"
 VPN_CFG_VAL=cfgVpnChk
@@ -14,7 +16,7 @@ then
   if [ -f $DATA_PATH/$VPN_CFG_VAL.dat ]
   then
     rtemp=$(cat $DATA_PATH/$VPN_CFG_VAL.dat)
-    if [ $(cat $DATA_PATH/$CFG_VAL.dat) = "1" ]
+    if [ $(cat $DATA_PATH/$VPN_CFG_VAL.dat) = "1" ]
     then
       COUNTER1=0
       while [ $COUNTER1 -lt 5 ]; do

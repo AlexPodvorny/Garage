@@ -3,7 +3,7 @@
 # settings
 . /etc/master/settings.sh
 
-api_key='V5YCOXLLZ66LBE3Z'
+
 CFG_VAL=cfgThingspeak
 
 if [ -f $DATA_PATH/$CFG_VAL.dat ]

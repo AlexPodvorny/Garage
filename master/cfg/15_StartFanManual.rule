@@ -1,0 +1,33 @@
+# RULE 15 Запустить вентилятр вручную (regex)
+MATCHED_RULE15='0'
+REGEX='CYCLE'
+if [[ $LINE =~ $REGEX ]]
+then
+ MATCHED_RULE15="1"
+fi
+
+
+# RULE 15 CONDITIONS
+#Condition 15.1 (var) 
+TEST_VARIABLE=`cat $DATA_PATH/Fan.dat`
+if [[ $TEST_VARIABLE -ne "0" ]]
+then
+ MATCHED_RULE15="0"
+fi
+
+#Condition 15.2 (var) 
+TEST_VARIABLE=`cat $DATA_PATH/Button.dat`
+if [[ $TEST_VARIABLE -ne "0" ]]
+then
+ MATCHED_RULE15="0"
+fi
+
+
+# RULE 15 ACTIONS
+if [[ "$MATCHED_RULE15" == "1" ]]
+then
+
+#Action 15.1 (action) 
+echo "Action added: StartFanManualFun" | write_log
+echo -n "StartFanManualFun">$DATA_PATH/incoming_action.txt
+fi

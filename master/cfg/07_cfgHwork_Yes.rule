@@ -1,0 +1,44 @@
+# RULE 7 cfgHwork_Yes (action)
+MATCHED_RULE7='0'
+if [[ $ACTION_RECEIVED == "cfgHwork_Yes" ]]
+then
+ MATCHED_RULE7="1"
+fi
+
+
+# RULE 7 CONDITIONS
+#Condition 7.1 (var) 
+TEST_VARIABLE=`cat $DATA_PATH/cfgHwork.dat`
+if [[ $TEST_VARIABLE -ne "0" ]]
+then
+ MATCHED_RULE7="0"
+fi
+
+
+# RULE 7 ACTIONS
+if [[ "$MATCHED_RULE7" == "1" ]]
+then
+
+#Action 7.1 (clear_timer) 
+echo "Clear timer: TimerHcycle" | write_log
+rm -f $DATA_PATH/TimerHcycle-*.timer
+
+#Action 7.2 (clear_timer) 
+echo "Clear timer: TimerHpause" | write_log
+rm -f $DATA_PATH/TimerHpause-*.timer
+
+#Action 7.3 (var) 
+echo "Updating variable: cfgHwork to 1" | write_log
+SAVE_DATA="1"
+echo -n "$SAVE_DATA">$DATA_PATH/cfgHwork.dat
+
+#Action 7.4 (var) 
+echo "Updating variable: Hcycle to 0" | write_log
+SAVE_DATA="0"
+echo -n "$SAVE_DATA">$DATA_PATH/Hcycle.dat
+
+#Action 7.5 (var) 
+echo "Updating variable: Hpause to 0" | write_log
+SAVE_DATA="0"
+echo -n "$SAVE_DATA">$DATA_PATH/Hpause.dat
+fi

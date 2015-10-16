@@ -1,0 +1,15 @@
+# RULE 16 LogDmesg (action)
+MATCHED_RULE16='0'
+if [[ $ACTION_RECEIVED == "LogDmesg" ]]
+then
+ MATCHED_RULE16="1"
+fi
+
+
+# RULE 16 ACTIONS
+if [[ "$MATCHED_RULE16" == "1" ]]
+then
+
+#Action 16.1 (custom) 
+dmesg > /home/dmesg_log
+fi

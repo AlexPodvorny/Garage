@@ -1,4 +1,4 @@
-MASTER_ID="bb67-ebc1-6081-c922"
+. /etc/sec.sh
 ARDUINO_PORT=/dev/ttyS1
 ARDUINO_PORT_SPEED=9600
 UPDATES_URL="http://connect.smartliving.ru/rules/"

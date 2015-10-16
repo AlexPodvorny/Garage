@@ -1,6 +1,6 @@
 #!/bin/bash
 
-LOG_FILE=/var/log/cycle
+LOGFILE=/var/log/cycle.log
 # Function to write to the Log file
 ###################################
 
@@ -11,12 +11,19 @@ write_log()
   	#LOGTIME=`date "+%Y-%m-%d %H:%M:%S"`
   	LOGTIME=`date "+%H:%M:%S"`
   	# If log file is not defined, just echo the output
-  	if [ "$LOG_FILE" == "" ]; then 
+  	if [ "$LOGFILE" == "" ]; then 
 	echo $LOGTIME": $text";
   	else
+<<<<<<< HEAD
 	touch $LOG_FILE
     	if [ ! -f $LOG_FILE ]; then echo "ERROR!! Cannot create log file $LOG_FILE. Exiting."; exit 1; fi
 	echo $LOGTIME": $text" | tee -a $LOG_FILE;
+=======
+    	# LOG=$LOG_FILE"_"`date +%Y%m%d`
+	touch $LOGFILE
+    	if [ ! -f $LOGFILE ]; then echo "ERROR!! Cannot create log file $LOGFILE. Exiting."; exit 1; fi
+	echo $LOGTIME": $text" | tee -a $LOGFILE;
+>>>>>>> master
   	fi
   done
 }
@@ -81,9 +88,20 @@ LINE="CYCLE"
 # сброс проверочного файла и очистка логов
 if [ -f $DATA_PATH/work_chk ]
 then
+<<<<<<< HEAD
 rm $LOG_FILE
 rm $DATA_PATH/work_chk
 fi
+=======
+  rm $LOGFILE
+  rm $DATA_PATH/work_chk
+fi
+
+
+echo "1" | write_log
+echo "Cycle"
+
+>>>>>>> master
 
 echo "Cycle start" | write_log
 PASSED_TIME="$(($(date +%s)-START_TIME))"
@@ -95,6 +113,8 @@ DATA_COMMAND=""
 DATA_VALUE=""
 
 REGEX='^P:([0-9]+);F:([0-9]+);T:([0-9]+);C:([0-9]+);D:([0-9]+);$'
+
+
 
 # чтение датчиков
 . /etc/master/sensors.sh

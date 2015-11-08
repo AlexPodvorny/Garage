@@ -1,0 +1,7 @@
+#/bin/bash
+STAGING_DIR=home/alex/openwrt/attitude_adjustment/staging_dir/
+export STAGING_DIR
+/home/alex/openwrt/attitude_adjustment/staging_dir/toolchain-mipsel_gcc-4.6-linaro_uClibc-0.9.33.2/bin/mipsel-openwrt-linux-uclibc-gcc \
+ -I//home/alex/openwrt/attitude_adjustment/staging_dir/target-mipsel_uClibc-0.9.33.2/usr/include/modbus \
+ -L/home/alex/openwrt/attitude_adjustment/staging_dir/target-mipsel_uClibc-0.9.33.2/usr/lib \
+ -lmodbus mymodbus.c -o mymodbus

@@ -52,6 +52,14 @@ then
 	sendstr="$sendstr&field5=$(cat $DATA_PATH/Tin.dat)"
       fi
     fi
+    # влажность в гараже
+    if [ -f $DATA_PATH/Hgarage_S.dat ]
+    then
+      if [ $(cat $DATA_PATH/Hgarage_S.dat) = "OK" ]
+      then
+	sendstr="$sendstr&field6=$(cat $DATA_PATH/Hgarage.dat)"
+      fi
+    fi
   fi
   
   # отправка на сервер

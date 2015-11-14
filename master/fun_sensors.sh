@@ -221,10 +221,10 @@ then
   sensor_parce_avg "h2" $3 "$rtemp"
   sensor_parce "t2" $4 "$rtemp"
 else
-  sensor_error "h1" $1
-  sensor_error "t1" $2
-  sensor_error "h2" $3
-  sensor_error "t2" $4
+  sensor_error $1 "3"
+  sensor_error $2 "3"
+  sensor_error $3 "3"
+  sensor_error $4 "3"
 fi
 }
 

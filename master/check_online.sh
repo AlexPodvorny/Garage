@@ -2,8 +2,8 @@
 
 . /etc/master/settings.sh
 
-ONLINE_CHECK_HOST="8.8.8.8"
-VPN_CHECK_HOST="192.168.99.3"
+ONLINE_CHECK_HOST="212.47.228.185"
+VPN_CHECK_HOST="10.1.51.45"
 VPN_CFG_VAL=cfgVpnChk
 # wait to be online
 COUNTER=0
@@ -34,9 +34,9 @@ then
       # vpn connection not available - restart conection
       LOGTIME1=`date "+%Y-%m-%d %H:%M:%S"`
       echo $LOGTIME1": vpn restart" >> /root/reboot
-      poff vpn
+      ifdown vpn
       sleep 10
-      pon vpn
+      ifup vpn
       exit;
     fi
   fi  

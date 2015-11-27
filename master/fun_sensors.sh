@@ -143,14 +143,15 @@ function sensor_error {
 # 1 - имя пораметра во входной строке
 # 2 - имя переменной для сохранения
 # 3 - принятоая строка
+# 4 - строка со значением ошибки
 function sensor_parce_avg {
   SENSOR_VAL=""
-  REGEX=$1'=([0-9.]+)'
+  REGEX=$1'=([0-9.-]+)'
   #echo $REGEX
   if [[ $3 =~ $REGEX ]]
   then
     SENSOR_VAL=${BASH_REMATCH[1]}
-    if [ $SENSOR_VAL != "-1.0" ]
+    if [ $SENSOR_VAL != "$4" ]
     then
       # - усреднение 
       #echo $SENSOR_VAL
@@ -181,13 +182,14 @@ function sensor_parce_avg {
 # 1 - имя пораметра во входной строке
 # 2 - имя переменной для сохранения
 # 3 - принятоая строка
+# 4 - строка со значением ошибки
 function sensor_parce {
   SENSOR_VAL=""
-  REGEX=$1'=([0-9.]+)'
+  REGEX=$1'=([0-9.-]+)'
   if [[ $3 =~ $REGEX ]]
   then
     SENSOR_VAL=${BASH_REMATCH[1]}
-    if [ $SENSOR_VAL != "-1.0" ]
+    if [ $SENSOR_VAL != "$4" ]
     then
       echo $(printf %.1f $SENSOR_VAL) > $DATA_PATH/$2.dat
       echo $(printf %.0f $SENSOR_VAL) > $DATA_PATH/"$2"I.dat
@@ -216,10 +218,10 @@ function modbus_read {
 rtemp=$(/root/mymodbus)
 if [[ $? = 0 ]];
 then
-  sensor_parce_avg "h1" $1 "$rtemp"
-  sensor_parce "t1" $2 "$rtemp"
-  sensor_parce_avg "h2" $3 "$rtemp"
-  sensor_parce "t2" $4 "$rtemp"
+  sensor_parce_avg "h1" $1 "$rtemp" "-1.0"
+  sensor_parce "t1" $2 "$rtemp" "ERROR"
+  sensor_parce_avg "h2" $3 "$rtemp" "-1.0"
+  sensor_parce "t2" $4 "$rtemp" "ERROR"
 else
   sensor_error $1 "3"
   sensor_error $2 "3"

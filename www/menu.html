@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+
+        <head>
+                <meta charset="utf-8">
+
+                <!-- Force latest available IE rendering engine and Chrome Frame (if installed) -->
+                <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+                <!-- Document Title & Description -->
+                <title>Menu</title>
+
+                <!-- Mobile Screen Resizing -->
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+                <!-- stylesheet -->
+                <link rel="stylesheet" href="kraken-master/css/kraken.css" type="text/css">
+
+                <!-- HTML5 Shim for IE 6-8 -->
+                <!--[if lt IE 9]>
+                        <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+                <![endif]-->
+
+        </head>
+
+        <body>
+
+<script language="javascript">
+// ------------------------------------------------------------
+
+ function getBlockProcessed(block_id, data) {
+  layer = document.getElementById(block_id);
+  layer.innerHTML=data;
+ }
+
+  function updateUnit(block_id, url) {
+   getBlockData(block_id, url);
+  }
+
+  function runAction(block_id, url) {
+      getBlockData(block_id, url);
+  }
+
+ function getBlockData(block_id, url) {
+  layer = document.getElementById(block_id);
+  old_data=layer.innerHTML;
+
+
+ var xmlhttp=false;
+
+/*@cc_on @*/
+/*@if (@_jscript_version >= 5)
+// JScript gives us Conditional compilation, we can cope with old IE versions.
+// and security blocked creation of the objects.
+ try {
+  xmlhttp = new ActiveXObject("Msxml2.XMLHTTP");
+ } catch (e) {
+  try {
+   xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+  } catch (E) {
+   xmlhttp = false;
+  }
+ }
+@end @*/
+
+  if (!xmlhttp && typeof XMLHttpRequest!='undefined') {
+   xmlhttp = new XMLHttpRequest();
+  }
+  xmlhttp.open("GET", url,true);
+
+  xmlhttp.onreadystatechange=function() {
+   if (xmlhttp.readyState==4) {
+    eval('getBlockProcessed(\''+block_id+'\', xmlhttp.responseText);');
+   }
+  }
+  xmlhttp.send(null);
+  return false;
+
+
+ }
+
+
+</script>
+
+                <section class="container">
+                        <h2>Мой гараж</h2>
+                </section>
+
+ <script language="javascript">
+  function menuToggle(id) {
+   var elem=document.getElementById('sub'+id);
+   if (elem.style.display!='none') {
+    elem.style.display='none';
+   } else {
+    elem.style.display='block';
+   }
+   return false;
+  }
+ </script>
+
+                <section class="container">
+                        <p>
+
+ 
+ 
+ 
+  <h3>Вентилятор: <span id="unit344">%Fan%</span></h3>
+ 
+ 
+
+ 
+ 
+ 
+  <h3>Погреб H: <span id="unit339">%Hcellar%</span></h3>
+ 
+ 
+
+ 
+ 
+ 
+  <h3>Погреб t: <span id="unit340">%Tcellar%</span></h3>
+ 
+ 
+
+ 
+ 
+ 
+  <h3>Гараж H: <span id="unit351">%Hgarage%</span></h3>
+  
+  
+  
+  
+  
+  
+  <h3>Гараж t: <span id="unit353">%Tgarage%</span></h3>
+ 
+ 
+
+ 
+ 
+ 
+  <h3>Контроллер t: <span id="unit352">%Tin%</span></h3>
+ 
+ 
+
+ 
+ <button class="btn btn-large btn-block btn-secondary" onClick="return menuToggle('341');">Ручное управление</button>
+ <div id="sub341" style="display:none">
+  
+ 
+ 
+ <button class="btn btn-large btn-block" onClick="return runAction('processing342', '/cgi-bin/master?op=action&line=StartFanManualFun');">Включить <span id="processing342"></span></button>
+ 
+ 
+ 
+
+ 
+ 
+ <button class="btn btn-large btn-block" onClick="return runAction('processing343', '/cgi-bin/master?op=action&line=StopFanManualFun');">Отключить <span id="processing343"></span></button>
+ 
+ 
+ 
+
+ </div>
+ 
+
+ 
+ <button class="btn btn-large btn-block btn-secondary" onClick="return menuToggle('345');">Регулировка влажности</button>
+ <div id="sub345" style="display:none">
+  
+ 
+ 
+ 
+  <h3>Регулировать: <span id="unit346">%cfgHwork%</span></h3>
+ 
+ 
+
+ 
+ 
+ 
+  <h3>Цикл: <span id="unit349">%Hcycle%</span></h3>
+ 
+ 
+
+ 
+ 
+ 
+  <h3>Пауза: <span id="unit350">%Hpause%</span></h3>
+ 
+ 
+
+ 
+ 
+ <button class="btn btn-large btn-block" onClick="return runAction('processing347', '/cgi-bin/master?op=action&line=cfgHwork_Yes');">Включить <span id="processing347"></span></button>
+ 
+ 
+ 
+
+ 
+ 
+ <button class="btn btn-large btn-block" onClick="return runAction('processing348', '/cgi-bin/master?op=action&line=cfgHwork_No');">Отключить <span id="processing348"></span></button>
+ 
+ 
+ 
+
+ </div>
+ 
+
+ 
+ <button class="btn btn-large btn-block btn-secondary" onClick="return menuToggle('353');">Передача данных</button>
+ <div id="sub353" style="display:none">
+  
+ 
+ 
+ 
+  <h3>Thingspeak: <span id="unit354">%cfgThingspeak%</span></h3>
+ 
+ 
+
+ 
+ 
+ <button class="btn btn-large btn-block" onClick="return runAction('processing355', '/cgi-bin/master?op=action&line=cfgThingspeak_Yes');">Включить <span id="processing355"></span></button>
+ 
+ 
+ 
+
+ 
+ 
+ <button class="btn btn-large btn-block" onClick="return runAction('processing356', '/cgi-bin/master?op=action&line=cfgThingspeak_No');">Отключить <span id="processing356"></span></button>
+ 
+ 
+ 
+
+ 
+ 
+ 
+  <h3>MajorDoMo: <span id="unit357">%cfgMdm%</span></h3>
+ 
+ 
+
+ 
+ 
+ <button class="btn btn-large btn-block" onClick="return runAction('processing358', '/cgi-bin/master?op=action&line=cfgMdm_Yes');">Включить <span id="processing358"></span></button>
+ 
+ 
+ 
+
+ 
+ 
+ <button class="btn btn-large btn-block" onClick="return runAction('processing359', '/cgi-bin/master?op=action&line=cfgMdm_No');">Отключить <span id="processing359"></span></button>
+ 
+ 
+ 
+
+ </div>
+ 
+
+ 
+ 
+ <button class="btn btn-large btn-block" onClick="return runAction('processing360', '/cgi-bin/master?op=action&line=Reload');">Перезагрузка <span id="processing360"></span></button>
+ 
+ 
+ 
+
+ 
+ 
+ <button class="btn btn-large btn-block" onClick="return runAction('processing366', '/cgi-bin/master?op=action&line=LogDmesg');">Log dmesg <span id="processing366"></span></button>
+ 
+ 
+ 
+
+ 
+ 
+ <button class="btn btn-large btn-block" onClick="return runAction('processing367', '/cgi-bin/master?op=action&line=LogLog');">LogRead <span id="processing367"></span></button>
+ 
+ 
+ 
+
+ 
+ 
+ <button class="btn btn-large btn-block" onClick="return runAction('processing368', '/cgi-bin/master?op=action&line=SystemReboot');">Reboot <span id="processing368"></span></button>
+ 
+ 
+ 
+
+
+
+<script language="javascript">
+  var updateTimer;
+  function updateData() {
+   clearTimeout(updateTimer);
+   
+   
+    
+    updateUnit('unit344', '/cgi-bin/master?op=get&var=Fan');
+    
+   
+   
+   
+   
+    
+    updateUnit('unit339', '/cgi-bin/master?op=get&var=Hcellar');
+    
+   
+   
+   
+   
+    
+    updateUnit('unit340', '/cgi-bin/master?op=get&var=Tcellar');
+    
+   
+   
+   
+   
+    
+    updateUnit('unit351', '/cgi-bin/master?op=get&var=Hgarage');
+    
+    
+    
+    
+    
+    
+     updateUnit('unit353', '/cgi-bin/master?op=get&var=Tgarage');
+    
+   
+   
+   
+   
+    
+    updateUnit('unit352', '/cgi-bin/master?op=get&var=Tin');
+    
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+    
+    updateUnit('unit346', '/cgi-bin/master?op=get&var=cfgHwork');
+    
+   
+   
+   
+   
+    
+    updateUnit('unit349', '/cgi-bin/master?op=get&var=Hcycle');
+    
+   
+   
+   
+   
+    
+    updateUnit('unit350', '/cgi-bin/master?op=get&var=Hpause');
+    
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+    
+    updateUnit('unit354', '/cgi-bin/master?op=get&var=cfgThingspeak');
+    
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+    
+    updateUnit('unit357', '/cgi-bin/master?op=get&var=cfgMdm');
+    
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   updateTimer=setTimeout("updateData();",10000);
+  }
+  updateData();
+</script>
+
+
+                        </p>
+                </section>
+        </body>
+</html>

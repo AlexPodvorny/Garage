@@ -1,0 +1,92 @@
+#!/bin/bash
+
+DATA_PATH="/var/data"
+
+echo "Content-type: text/plain"
+echo ""
+
+# Save the old internal field separator.
+  OIFS="$IFS"
+
+# Set the field separator to & and parse the QUERY_STRING at the ampersand.
+  IFS="${IFS}&"
+  set $QUERY_STRING
+  Args="$*"
+  IFS="$OIFS"
+
+# Next parse the individual "name=value" tokens.
+
+  ARG_VALUE=""
+  ARG_VAR=""
+  ARG_OP=""
+  ARG_LINE=""
+
+  for i in $Args ;do
+
+#       Set the field separator to =
+        IFS="${OIFS}="
+        set $i
+        IFS="${OIFS}"
+
+        case $1 in
+                # Don't allow "/" changed to " ". Prevent hacker problems.
+                var) ARG_VAR="`echo -n $2 | sed 's|[\]||g' | sed 's|%20| |g'`"
+                       ;;
+                #
+                value) ARG_VALUE=$2
+                       ;;
+                line) ARG_LINE=$2
+                       ;;
+                op) ARG_OP=$2
+                       ;;
+                *)     echo "<hr>Warning:"\
+                            "<br>Unrecognized variable \'$1\' passed.<hr>"
+                       ;;
+
+        esac
+  done
+
+# Set value
+#ARG_OP="set"
+
+#echo $ARG_OP
+
+if [[ "$ARG_OP" == "set" ]]
+then
+# echo "Set operation<br>"
+ echo -n "$ARG_VALUE">$DATA_PATH/$ARG_VAR.dat
+ echo "OK"
+fi
+
+if [[ "$ARG_OP" == "get" ]]
+then
+# echo "Get operation<br>"
+ cat $DATA_PATH/$ARG_VAR.dat
+fi
+
+if [[ "$ARG_OP" == "send" ]]
+then
+# echo "Send<br>"
+ echo -n $ARG_LINE>>$DATA_PATH/incoming_data.txt
+ echo "OK"
+fi
+
+if [[ "$ARG_OP" == "action" ]]
+then
+# echo "Action<br>"
+ echo -n $ARG_LINE>>$DATA_PATH/incoming_action.txt
+ echo "OK"
+fi
+
+if [[ "$ARG_OP" == "refresh" ]]
+then
+# echo "Send<br>"
+ echo "Web">$DATA_PATH/reboot
+ echo "OK"
+fi
+
+if [[ "$ARG_OP" == "run" ]]
+then
+# echo "Run<br>"
+ echo `$ARG_LINE`
+fi

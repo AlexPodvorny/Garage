@@ -3,7 +3,7 @@
 # settings
 . /etc/master/settings.sh
 CFG_VAL=cfgWdog
-LOGFILE=/var/log/cycle.log
+LOGFILE=/var/log/masterlua.log
 
 if [ -f $DATA_PATH/$CFG_VAL.dat ]
 then
@@ -26,7 +26,7 @@ then
       fi
       # проверка наличия процесса
       LOGTIME=`date "+%Y-%m-%d %H:%M:%S"`
-      if [ $(ps | grep [c]ycle.sh | wc -l) -eq 0 ]
+      if [ $(ps | grep 'master.lua' | grep -v 'grep' | wc -l) -eq 0 ]
       then
 	# нет процесса - запустить
 	echo "Restart"

@@ -7,13 +7,13 @@ CFG_PATCH = '/etc/master/cfg'
 GPIO_FAN = '0'
 GPIO_FAN_ON = '1'
 GPIO_FAN_OFF = '0'
-GPIO_LED = '4'
-GPIO_LED_ON = '0'
-GPIO_LED_OFF = '1'
+-- GPIO_LED = '4'
+-- GPIO_LED_ON = '0'
+-- GPIO_LED_OFF = '1'
 -- время ручного запуска
 TIME_MANUAL_FAN = 120
 -- время цикла
-TIME_CYCLE_FAN = 1200
+-- TIME_CYCLE_FAN = 1200
 -- время паузы
 TIME_PAUSE_FAN = 300
 -- периодичность считывания внутренней температуры
@@ -32,13 +32,21 @@ function readconfig(x)
   readcfgparam(x, "cfgThingspeak")
   readcfgparam(x, "cfgVpnChk")
   readcfgparam(x, "cfgWdog")
+  readcfgparam(x, "cfgTimeCycleFan")
+  readcfgparam(x, "cfgTimePauseFan")
   -- перевод в number для расчетов
   x.Hstart = tonumber(x.cfgHstart)
   if not x.Hstart then logger:warn("Error convert to num Hsart: %s", x.cfgHstart); end
   x.Hstop = tonumber(x.cfgHstop)
   if not x.Hstop then logger:warn("Error convert to num Hstop: %s", x.cfgHstop); end
-    x.Hwork = tonumber(x.cfgHwork)
+  x.Hwork = tonumber(x.cfgHwork)
   if not x.Hwork then logger:warn("Error convert to num Hwork: %s", x.cfgHwork); end
+
+  x.TimeCycleFan = tonumber(x.cfgTimeCycleFan)
+  if not x.TimeCycleFan then logger:warn("Error convert to num TimeCycleFan %s", x.cfgTimeCycleFan); end
+
+  x.TimePauseFan = tonumber(x.cfgTimePauseFan)
+  if not x.TimePauseFan then logger:warn("Error convert to num TimePauseFan %s", x.cfgTimePauseFan); end
 end
 
 -- чтение конфирурационного параметра с записью при изменении
@@ -74,7 +82,7 @@ function saveparms(x)
   if not x.HgarageA then rt,status = pcall(writeparam, "HgarageA", "-1"); end
   if not x.Tgarage then rt,status = pcall(writeparam, "Tgarage", "-1"); end
   if not x.Tin then rt,status = pcall(writeparam, "Tin", "-1"); end
-  
+   
   --формирования строки для передачи Thingspeak
   local str=""
   if x.Hcellar 	then str = str .. string.format("&field1=%.1f", x.Hcellar); end
@@ -95,6 +103,7 @@ function readparam(name)
   end
   local pdata = pfile:read();
   pfile:close();
+  
   return pdata  
 end
 -- чтение и очистка камандного файла
@@ -153,6 +162,7 @@ function readgpio(num)
 	local gpiofile = io.open("/sys/class/gpio/gpio" .. num .. "/value")
 	local gpiodata = gpiofile:read();
 	gpiofile:close();
+    table.concat()
 	return tonumber(gpiodata)
 end
 
@@ -240,8 +250,6 @@ function Rule5()
    Param.Hcycle = 0
    rt,status = pcall(setgpio, GPIO_FAN, GPIO_FAN_OFF)
    if not rt then logger:warn("Error set gpio Fan: %s",status); end
-   rt,status = pcall(setgpio, GPIO_LED, GPIO_LED_OFF)
-   if not rt then logger:warn("Error set gpio Led: %s",status); end
   end  
 end
 -- включить регулировку
@@ -276,8 +284,6 @@ function Rule7()
     Var.ButtonFlag = false
     rt,status = pcall(setgpio, GPIO_FAN, GPIO_FAN_ON)
     if not rt then logger:warn("Error set gpio Fan: %s",status); end
-    rt,status = pcall(setgpio, GPIO_LED, GPIO_LED_ON)
-    if not rt then logger:warn("Error set gpio Led: %s",status); end
     Var.TimerManualCycleStart = socket.gettime();
     Var.TimerCycleStart = nil
     Var.TimerPauseStart = nil
@@ -313,8 +319,6 @@ function Rule8()
     Var.ButtonFlag = false
     rt,status = pcall(setgpio, GPIO_FAN, GPIO_FAN_OFF)
     if not rt then logger:warn("Error set gpio Fan: %s",status); end
-    rt,status = pcall(setgpio, GPIO_LED, GPIO_LED_OFF)
-    if not rt then logger:warn("Error set gpio Led: %s",status); end
     logger:warn("Stop Fan manual")
   end
 end
@@ -331,8 +335,6 @@ function Rule9()
     local rt, status
     rt,status = pcall(setgpio, GPIO_FAN, GPIO_FAN_ON)
     if not rt then logger:warn("Error set gpio Fan: %s",status); end
-    rt,status = pcall(setgpio, GPIO_LED, GPIO_LED_ON)
-    if not rt then logger:warn("Error set gpio Led: %s",status); end
     Var.TimerCycleStart = socket.gettime()
     logger:debug("Start Fan cycle Hcellar=" .. Param.Hcellar)
   end
@@ -345,8 +347,6 @@ function Rule10()
     local rt, status
     rt,status = pcall(setgpio, GPIO_FAN, GPIO_FAN_OFF)
     if not rt then logger:warn("Error set gpio Fan: %s",status); end
-    rt,status = pcall(setgpio, GPIO_LED, GPIO_LED_OFF)
-    if not rt then logger:warn("Error set gpio Led: %s",status); end
     Var.TimerCycleStart = nil
     -- запустить цикл паузы работы
     Var.TimerPauseStart = socket.gettime()
@@ -359,12 +359,10 @@ function Rule11()
  if (not Param.Fan) or (Param.Fan ~= 1) or (not Var.TimerCycleStart) then return; end
  if (not Param.Hcellar) or (not Cfg.Hstop) then return; end
  local tm = socket.gettime() - Var.TimerCycleStart
- if tm >= TIME_CYCLE_FAN then
+ if tm >= Param.TimeCycleFan then
     local rt, status
     rt,status = pcall(setgpio, GPIO_FAN, GPIO_FAN_OFF)
     if not rt then logger:warn("Error set gpio Fan: %s",status); end
-    rt,status = pcall(setgpio, GPIO_LED, GPIO_LED_OFF)
-    if not rt then logger:warn("Error set gpio Led: %s",status); end
     Var.TimerCycleStart = nil
     -- запустить цикл паузы работы
     Var.TimerPauseStart = socket.gettime()
@@ -372,7 +370,7 @@ function Rule11()
     logger:debug("Stop Fan cycle (timeout) Hcellar=" .. Param.Hcellar)
  else
    -- занести остаток секунд в переменную
-   tm = TIME_CYCLE_FAN - tm
+   tm = Param.TimeCycleFan - tm
    tm = tm - tm%0.1
    Param.Hcycle = tm
  end
@@ -381,13 +379,13 @@ end
 function Rule12()
   if not Var.TimerPauseStart then return; end
   local tm = socket.gettime() - Var.TimerPauseStart
-  if tm >= TIME_PAUSE_FAN then
+  if tm >= Param.TimeCycleFan then
     Param.Hpause = 0
     Var.TimerPauseStart = nil
     logger:debug("End Pause Fan ")
   else
    -- занести остаток секунд в переменную
-   tm = TIME_PAUSE_FAN - tm
+   tm = Param.TimeCycleFan - tm
    tm = tm - tm%0.1
    Param.Hpause = tm
   end
@@ -423,8 +421,6 @@ os.execute("cp " .. CFG_PATCH .. "/cfg*.dat " .. DATA_PATH .. "/")
 -- установить gpio
 Rs,status = pcall(setgpio, GPIO_FAN, GPIO_FAN_OFF)
 if not Rs then logger:warn("Error set gpio Fan: %s",status); end
-Rs,status = pcall(setgpio, GPIO_LED, GPIO_LED_OFF)
-if not Rs then logger:warn("Error set gpio Led: %s",status); end
 
 -- основной цикл программы ----------------------------------------------------------
 while true do

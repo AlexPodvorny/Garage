@@ -19,9 +19,30 @@ TIME_PAUSE_FAN = 300
 -- периодичность считывания внутренней температуры
 TIN_CYCLE_TIME = 60
 
+-- mqtt 
+MQTT_HOST = '10.1.51.45'
+MQTT_USER = 'server'
+MQTT_PASSWORD = 'XXXXXX'
+MQTT_RECONECT_TIME = 60
+MQTT_SUBCRIBE_TOPICS = { 'Garage/#' }
 -- функция логов
 
 local logger = logging.rolling_file("/var/log/masterlua.log", 1024*100, 5)
+
+
+-- работа с MQTT
+
+
+function callback(
+    topic,    -- string
+    message)  -- string
+
+    print("Topic: " .. topic .. ", message: '" .. message .. "'")
+
+    -- mqtt_client:publish(args.topic_p, message)
+end
+
+
 
 -- функция чтения конфигурации
 function readconfig(x)
@@ -401,9 +422,11 @@ Cfg = {}
 Var = {}
 Param.Hcycle = 0
 Param.Hpause = 0
+local error_message = nil
 -- ожидание окончания инициализации
 logger:error("Master cycle start wait")
-socket.sleep(30)
+socket.sleep(1)
+print("Master cycle init")
 logger:error("Master cycle init")
 -- Создание директории
 if exists("/var/data/") == false then
@@ -421,6 +444,19 @@ os.execute("cp " .. CFG_PATCH .. "/cfg*.dat " .. DATA_PATH .. "/")
 -- установить gpio
 Rs,status = pcall(setgpio, GPIO_FAN, GPIO_FAN_OFF)
 if not Rs then logger:warn("Error set gpio Fan: %s",status); end
+-- Подключение MQTT клиента к серверу
+local MQTT = require "paho.mqtt"
+MQTT.Utility.set_debug(false)
+local mqtt_client = MQTT.client.create(MQTT_HOST, 1883, callback)
+mqtt_client:auth(MQTT_USER, MQTT_PASSWORD)
+Var.MqttStatusSend = false
+mqtt_client:connect("garage","Garage/status",0,1,"NOCON")
+mqtt_client:subscribe(MQTT_SUBCRIBE_TOPICS)
+if(mqtt_client.connected == true) then
+    mqtt_client:publish('Garage/status','CON', true)
+    Var.MqttStatusSend = true
+end
+Var.MqttConTime= socket.gettime()
 
 -- основной цикл программы ----------------------------------------------------------
 while true do
@@ -518,8 +554,8 @@ while true do
   
   saveparms(Param)
   t6 = socket.gettime()
-  print("Heep is " .. collectgarbage("count"))
-  collectgarbage("step",1000)
+  -- print("Heep is " .. collectgarbage("count"))
+  -- collectgarbage("step",1000)
   tend = socket.gettime();
   --[[
   print("All " .. tend - tstart .. " Sec");
@@ -531,7 +567,38 @@ while true do
   print("saveparam  " .. t6 - t5 .. " Sec");
   print("heep  " .. tend - t6 .. " Sec");
  ]]
- -- logger:debug(string.format("Time cycle : %.1f ms",(tend - tstart)*1000))
+ -- mqtt
+ print("Mqtt status is " .. tostring(mqtt_client.connected))
+ if (mqtt_client.connected == true) then 
+     error_message = mqtt_client:handler()
+     if (error_message ~= nil) then
+        print("MQTT " .. error_message)
+        logger:error("MQTT " .. error_message)
+     end
+ else
+    local tm
+    if Var.MqttConTime then tm = socket.gettime() - Var.MqttConTime; end
+    if (not Var.MqttConTime) or (tm >= MQTT_RECONECT_TIME) then
+      print("Mqtt reconnect")
+      mqtt_client:destroy()
+      Var.MqttConTime= socket.gettime()
+      mqtt_client = MQTT.client.create(MQTT_HOST, 1883, callback)
+      mqtt_client:auth(MQTT_USER, MQTT_PASSWORD)
+      mqtt_client:connect("garage","Garage/status",0,1,"NOCON")
+      mqtt_client:subscribe(MQTT_SUBCRIBE_TOPICS)
+      if(mqtt_client.connected == true) then
+         mqtt_client:publish('Garage/status','CON', true)
+         Var.MqttStatusSend = true
+      end
+     logger:error("Reconnect to MQTT server")
+    end
+ end
+
+
+
+ logger:debug(string.format("Time cycle : %.1f ms",(tend - tstart)*1000))
+
+
   Param.Tcycle = tend-tstart;
   if Param.Tcycle < 2.0 and Param.Tcycle >= 0 then
     socket.sleep(2.0 - Param.Tcycle)

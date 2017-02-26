@@ -22,7 +22,7 @@ TIN_CYCLE_TIME = 60
 -- mqtt 
 MQTT_HOST = '10.1.51.45'
 MQTT_USER = 'server'
-MQTT_PASSWORD = 'XXXXXX'
+MQTT_PASSWORD = 'XXXXXXX'
 MQTT_RECONECT_TIME = 60
 MQTT_SUBCRIBE_TOPICS = { 'Garage/cmd/#' }
 -- функция логов
@@ -39,7 +39,100 @@ function callback(
 
     print("Topic: " .. topic .. ", message: '" .. message .. "'")
 
-    -- mqtt_client:publish(args.topic_p, message)
+    if (topic == "Garage/cmd/cfgHstart") then
+        if (tonumber(message) ~= nil) then
+            writeparam("cfgHstart",message)
+            writecfgparam("cfgHstart",message)
+            Cfg.cfgHstart = message
+            Cfg.Hstart = tonumber(message)
+        end
+    end
+    if (topic == "Garage/cmd/cfgHstop") then
+        if (tonumber(message) ~= nil) then
+            writeparam("cfgHstop",message)
+            writecfgparam("cfgHstop",message)
+            Cfg.cfgHstop = message
+            Cfg.Hstop = tonumber(message)
+        end
+    end
+    if (topic == "Garage/cmd/cfgTimeCycleFan") then
+        if (tonumber(message) ~= nil) then
+            writeparam("cfgTimeCycleFan",message)
+            writecfgparam("cfgTimeCycleFan",message)
+            Cfg.cfgTimeCycleFan = message
+            Cfg.cfgTimeCycleFan = tonumber(message)
+        end
+    end
+    if (topic == "Garage/cmd/cfgTimePauseFan") then
+        if (tonumber(message) ~= nil) then
+            writeparam("cfgTimePauseFan",message)
+            writecfgparam("cfgTimePauseFan",message)
+            Cfg.cfgTimePauseFan = message
+            Cfg.cfgTimePauseFan = tonumber(message)
+        end
+    end
+    if (topic == "Garage/cmd/cfgHwork") then
+        if (message == "ON") then
+            writeparam("cfgHwork","1")
+            writecfgparam("cfgHwork","1")
+            Cfg.cfgHwork = "1"
+            Cfg.Hwork = 1
+        end
+        if (message == "OFF") then
+            writeparam("cfgHwork","0")
+            writecfgparam("cfgHwork","0")
+            Cfg.cfgHwork = "0"
+            Cfg.Hwork = 0
+        end
+    end
+    if (topic == "Garage/cmd/cfgVpnChk") then
+        if (message == "ON") then
+            writeparam("cfgVpnChk","1")
+            writecfgparam("cfgVpnChk","1")
+            Cfg.cfgVpnChk = "1"
+        end
+        if (message == "OFF") then
+            writeparam("cfgVpnChk","0")
+            writecfgparam("cfgVpnChk","0")
+            Cfg.cfgVpnChk = "0"
+        end
+    end
+    if (topic == "Garage/cmd/cfgWdog") then
+        if (message == "ON") then
+            writeparam("cfgWdog","1")
+            writecfgparam("cfgWdog","1")
+            Cfg.cfgWdog = "1"
+        end
+        if (message == "OFF") then
+            writeparam("cfgWdog","0")
+            writecfgparam("cfgWdog","0")
+            Cfg.cfgWdog = "0"
+        end
+    end
+    if (topic == "Garage/cmd/cfgThingspeak") then
+        if (message == "ON") then
+            writeparam("cfgThingspeak","Yes")
+            writecfgparam("cfgThingspeak","Yes")
+            Cfg.cfgThingspeak = "Yes"
+        end
+        if (message == "OFF") then
+            writeparam("cfgThingspeak","No")
+            writecfgparam("cfgThingspeak","No")
+            Cfg.cfgThingspeak = "No"
+        end
+    end
+    if (topic == "Garage/cmd/cfgMdm") then
+        if (message == "ON") then
+            writeparam("cfgMdm","Yes")
+            writecfgparam("cfgMdm","Yes")
+            Cfg.cfgMdm = "Yes"
+        end
+        if (message == "OFF") then
+            writeparam("cfgMdm","No")
+            writecfgparam("cfgMdm","No")
+            Cfg.cfgMdm = "No"
+        end
+    end
 end
 
 
@@ -144,7 +237,6 @@ function publishnumparam(x, s, dlt, mqtt_client, topic)
     end
 end 
 
-
 function publishboolmparam(x, s, mqtt_client, topic)
     if (mqtt_client.connected == true) then
         if (x ~= nil) then
@@ -165,6 +257,33 @@ function publishboolmparam(x, s, mqtt_client, topic)
     end
 end
 
+function publishonoffparam(x, s, mqtt_client, topic, onstr)
+    if (mqtt_client.connected == true) then
+        if (x ~= nil) then
+            if (s == nil) or (x ~= s) then
+                if(x == onstr) then
+                    mqtt_client:publish(topic, "ON", true)
+                    print("Mqtt publis2 " .. topic .. "=ON")
+                else
+                    mqtt_client:publish(topic, "OFF", true)
+                    print("Mqtt publis2 " .. topic .. "=OFF")
+
+                end
+            end
+            return x
+        else
+            if (s ~= nil) then
+                mqtt_client:publish(topic, "NULL", true)
+                print("Mqtt publish " .. topic .. "=NULL")
+                return x
+            end
+        end
+    else
+        return s
+    end
+end
+
+
 function initmqttsave(s)
     s.Hcellar = -30000
     s.HcellarA = -30000
@@ -173,13 +292,25 @@ function initmqttsave(s)
     s.HgarageA = -30000
     s.Tgarage = -30000
     s.Tin = -30000
+    s.Hpause = -30000
+    s.Hcycle = -30000
 
     s.Fan = -30000
+    s.cfgHstart = ' '
+    s.cfgHstop = ' '
+    s.cfgTimeCycleFan = ' '
+    s.cfgTimePauseFan = ' '
+
+    s.cfgHwork = ' '
+    s.cfgMdm = ' '
+    s.cfgThingspeak = ' '
+    s.cfgVpnChk = ' '
+    s.cfgWdog = ' '
 end
 
 
 
-function publishparams(x,s,mqtt_client) 
+function publishparams(x,s,Cfg,mqtt_client) 
     
     s.Hcellar = publishnumparam(x.Hcellar, s.Hcellar, 0.1, mqtt_client, "Garage/Hcellar")
     s.HcellarA = publishnumparam(x.HcellarA, s.HcellarA, 0.1, mqtt_client, "Garage/HcellarA")
@@ -188,8 +319,24 @@ function publishparams(x,s,mqtt_client)
     s.HgarageA = publishnumparam(x.HgarageA, s.HgarageA, 0.1, mqtt_client, "Garage/HgarageA")
     s.Tgarage = publishnumparam(x.Tgarage, s.Tgarage, 0.1, mqtt_client, "Garage/Tgarage")
     s.Tin = publishnumparam(x.Tin, s.Tin, 0.15, mqtt_client, "Garage/Tdir320")
-
+    s.Hcycle = publishnumparam(x.Hcycle, s.Hcycle, 10, mqtt_client, "Garage/Hcycle")
+    s.Hpause = publishnumparam(x.Hpause, s.Hpause, 10, mqtt_client, "Garage/Hpause")
+    
+    
+    
     s.Fan = publishboolmparam(x.Fan, s.Fan, mqtt_client, "Garage/Fan")
+    s.cfgHstart = publishboolmparam(Cfg.cfgHstart, s.cfgHstart, mqtt_client, "Garage/cfgHstart")
+    s.cfgHstop = publishboolmparam(Cfg.cfgHstop, s.cfgHstop, mqtt_client, "Garage/cfgHstop")
+    s.cfgTimeCycleFan = publishboolmparam(Cfg.cfgTimeCycleFan, s.cfgTimeCycleFan, mqtt_client, "Garage/cfgTimeCycleFan")
+    s.cfgTimePauseFan = publishboolmparam(Cfg.cfgTimePauseFan, s.cfgTimePauseFan, mqtt_client, "Garage/cfgTimePauseFan")
+
+
+    s.cfgHwork = publishonoffparam(Cfg.cfgHwork, s.cfgHwork, mqtt_client, "Garage/cfgHwork","1")
+    s.cfgThingspeak = publishonoffparam(Cfg.cfgThingspeak, s.cfgThingspeak, mqtt_client, "Garage/cfgThingspeak","Yes")
+    s.cfgMdm = publishonoffparam(Cfg.cfgMdm, s.cfgMdm, mqtt_client, "Garage/cfgMdm","Yes")
+    s.cfgVpnChk = publishonoffparam(Cfg.cfgVpnChk, s.cfgVpnChk, mqtt_client, "Garage/cfgVpnChk","1")
+    s.cfgWdog = publishonoffparam(Cfg.cfgWdog, s.cfgWdog, mqtt_client, "Garage/cfgWdog","1")
+ 
 end
 
 
@@ -261,7 +408,6 @@ function readgpio(num)
 	local gpiofile = io.open("/sys/class/gpio/gpio" .. num .. "/value")
 	local gpiodata = gpiofile:read();
 	gpiofile:close();
-    table.concat()
 	return tonumber(gpiodata)
 end
 
@@ -563,11 +709,9 @@ while true do
   end
   t3 = socket.gettime();
   Rs,Param.Fan = pcall(readgpio, "0")
-  print("Fan = " .. tostring(Param.Fan))
   if Rs == false then Param.Fan=nil; end;
   -- чтение клавиши и определение нажатия
   Rs,Param.Button = pcall(readgpio, "6")
-  print("Button = " .. tostring(Param.Button))
   if Rs == false then 
     Param.Button=nil; Var.ButtonFlag = false; Var.ButtonOld = nil
   else
@@ -635,7 +779,7 @@ while true do
   
   
   saveparms(Param)
-  publishparams(Param,SVar,mqtt_client)
+  publishparams(Param,SVar,Cfg,mqtt_client)
   t6 = socket.gettime()
   -- print("Heep is " .. collectgarbage("count"))
   -- collectgarbage("step",1000)
@@ -651,7 +795,7 @@ while true do
   print("heep  " .. tend - t6 .. " Sec");
  ]]
  -- mqtt
- print("Mqtt status is " .. tostring(mqtt_client.connected))
+ -- print("Mqtt status is " .. tostring(mqtt_client.connected))
  if (mqtt_client.connected == true) then 
      error_message = mqtt_client:handler()
      if (error_message ~= nil) then

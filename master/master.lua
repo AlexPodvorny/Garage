@@ -24,7 +24,7 @@ MQTT_HOST = '10.1.51.45'
 MQTT_USER = 'server'
 MQTT_PASSWORD = 'XXXXXX'
 MQTT_RECONECT_TIME = 60
-MQTT_SUBCRIBE_TOPICS = { 'Garage/#' }
+MQTT_SUBCRIBE_TOPICS = { 'Garage/cmd/#' }
 -- функция логов
 
 local logger = logging.rolling_file("/var/log/masterlua.log", 1024*100, 5)
@@ -114,6 +114,84 @@ function saveparms(x)
   if x.Hgarage 	then str = str .. string.format("&field6=%.1f", x.Hgarage); end
   rt,status = pcall(writeparam, "strThingspeak", str)
 end
+
+-- сохранение параметра в MQTT
+function publishnumparam(x, s, dlt, mqtt_client, topic)
+    if ( mqtt_client.connected == true) then
+        if x then
+            if (s == nil) or (math.abs(x-s) >= dlt) then
+                mqtt_client:publish(topic, tostring(x), true)
+                print("Mqtt publish " .. topic .. "=" .. tostring(x))
+                return x
+            else
+                if (x == 0) and (s ~= 0) then
+                    mqtt_client:publish(topic, tostring(x), true)
+                    print("Mqtt publish1 " .. topic .. "=" .. tostring(x))
+                    return x
+                else
+                    return s
+                end
+            end
+        else
+            if (s ~= nil) then
+                mqtt_client:publish(topic, "NULL", true)
+                print("Mqtt publish " .. topic .. "=NULL")
+            end
+            return x
+        end
+    else
+        return s
+    end
+end 
+
+
+function publishboolmparam(x, s, mqtt_client, topic)
+    if (mqtt_client.connected == true) then
+        if (x ~= nil) then
+            if (s == nil) or (x ~= s) then
+                mqtt_client:publish(topic, x, true)
+                print("Mqtt publis2 " .. topic .. "=" .. tostring(x))
+            end
+            return x
+        else
+            if (s ~= nil) then
+                mqtt_client:publish(topic, "NULL", true)
+                print("Mqtt publish " .. topic .. "=NULL")
+                return x
+            end
+        end
+    else
+        return s
+    end
+end
+
+function initmqttsave(s)
+    s.Hcellar = -30000
+    s.HcellarA = -30000
+    s.Tcellar = -30000
+    s.Hgarage = -30000
+    s.HgarageA = -30000
+    s.Tgarage = -30000
+    s.Tin = -30000
+
+    s.Fan = -30000
+end
+
+
+
+function publishparams(x,s,mqtt_client) 
+    
+    s.Hcellar = publishnumparam(x.Hcellar, s.Hcellar, 0.1, mqtt_client, "Garage/Hcellar")
+    s.HcellarA = publishnumparam(x.HcellarA, s.HcellarA, 0.1, mqtt_client, "Garage/HcellarA")
+    s.Tcellar = publishnumparam(x.Tcellar, s.Tcellar, 0.1, mqtt_client, "Garage/Tcellar")
+    s.Hgarage = publishnumparam(x.Hgarage, s.Hgarage, 0.1, mqtt_client, "Garage/Hgarage")
+    s.HgarageA = publishnumparam(x.HgarageA, s.HgarageA, 0.1, mqtt_client, "Garage/HgarageA")
+    s.Tgarage = publishnumparam(x.Tgarage, s.Tgarage, 0.1, mqtt_client, "Garage/Tgarage")
+    s.Tin = publishnumparam(x.Tin, s.Tin, 0.15, mqtt_client, "Garage/Tdir320")
+
+    s.Fan = publishboolmparam(x.Fan, s.Fan, mqtt_client, "Garage/Fan")
+end
+
 
 -- чтение параметра
 function readparam(name)
@@ -420,6 +498,8 @@ logger:setLevel(logging.WARN)
 Param = {}
 Cfg = {}
 Var = {}
+SVar = {}
+initmqttsave(SVar)
 Param.Hcycle = 0
 Param.Hpause = 0
 local error_message = nil
@@ -483,9 +563,11 @@ while true do
   end
   t3 = socket.gettime();
   Rs,Param.Fan = pcall(readgpio, "0")
+  print("Fan = " .. tostring(Param.Fan))
   if Rs == false then Param.Fan=nil; end;
   -- чтение клавиши и определение нажатия
   Rs,Param.Button = pcall(readgpio, "6")
+  print("Button = " .. tostring(Param.Button))
   if Rs == false then 
     Param.Button=nil; Var.ButtonFlag = false; Var.ButtonOld = nil
   else
@@ -553,6 +635,7 @@ while true do
   
   
   saveparms(Param)
+  publishparams(Param,SVar,mqtt_client)
   t6 = socket.gettime()
   -- print("Heep is " .. collectgarbage("count"))
   -- collectgarbage("step",1000)

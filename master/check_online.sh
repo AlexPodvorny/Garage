@@ -48,7 +48,9 @@ fi
 let COUNTER=COUNTER+1
 done
 LOGTIME=`date "+%Y-%m-%d %H:%M:%S"`
-echo $LOGTIME": online reboot" >> /root/reboot
-route >> /root/reboot 
-echo Reboot...
-reboot
+echo $LOGTIME": online reset usb power" >> /root/reboot
+echo reset usb power...
+echo 1 > /sys/class/gpio/gpio5/value
+sleep 3
+echo 0 > /sys/class/gpio/gpio5/value
+exit;

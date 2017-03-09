@@ -1,8 +1,8 @@
 
 
-STAGING_DIR=home/alex/openwrt/attitude_adjustment/staging_dir/
+STAGING_DIR=home/alex/openwrt/openwrt/staging_dir/
 export STAGING_DIR
-OPENWRT = /home/alex/openwrt/attitude_adjustment
+OPENWRT = /home/alex/openwrt/openwrt
 
 KERNEL = ${OPENWRT}/build_dir/linux-brcm47xx/linux-3.3.8
 LD=${OPENWRT}/staging_dir/toolchain-mipsel_gcc-4.6-linaro_uClibc-0.9.33.2/bin/mipsel-openwrt-linux-uclibc-ld

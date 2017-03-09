@@ -9,7 +9,7 @@
 
 #include "mydht.h"
 
-#define DHT1_PIN 5
+#define DHT1_PIN 4
 #define DHT2_PIN 3
 #define DHT_PULSES 41
 #define DHT_MAXCOUNT 100

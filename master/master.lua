@@ -22,7 +22,7 @@ TIN_CYCLE_TIME = 60
 -- mqtt 
 MQTT_HOST = '10.1.51.45'
 MQTT_USER = 'server'
-MQTT_PASSWORD = 'XXXXXXX'
+MQTT_PASSWORD = 'XXXXXX'
 MQTT_RECONECT_TIME = 60
 MQTT_SUBCRIBE_TOPICS = { 'Garage/cmd/#' }
 -- функция логов
@@ -60,7 +60,7 @@ function callback(
             writeparam("cfgTimeCycleFan",message)
             writecfgparam("cfgTimeCycleFan",message)
             Cfg.cfgTimeCycleFan = message
-            Cfg.cfgTimeCycleFan = tonumber(message)
+            Cfg.TimeCycleFan = tonumber(message)*60
         end
     end
     if (topic == "Garage/cmd/cfgTimePauseFan") then
@@ -68,7 +68,7 @@ function callback(
             writeparam("cfgTimePauseFan",message)
             writecfgparam("cfgTimePauseFan",message)
             Cfg.cfgTimePauseFan = message
-            Cfg.cfgTimePauseFan = tonumber(message)
+            Cfg.TimePauseFan = tonumber(message)*60
         end
     end
     if (topic == "Garage/cmd/cfgHwork") then
@@ -156,10 +156,10 @@ function readconfig(x)
   x.Hwork = tonumber(x.cfgHwork)
   if not x.Hwork then logger:warn("Error convert to num Hwork: %s", x.cfgHwork); end
 
-  x.TimeCycleFan = tonumber(x.cfgTimeCycleFan)
+  x.TimeCycleFan = tonumber(x.cfgTimeCycleFan)*60
   if not x.TimeCycleFan then logger:warn("Error convert to num TimeCycleFan %s", x.cfgTimeCycleFan); end
 
-  x.TimePauseFan = tonumber(x.cfgTimePauseFan)
+  x.TimePauseFan = tonumber(x.cfgTimePauseFan)*60
   if not x.TimePauseFan then logger:warn("Error convert to num TimePauseFan %s", x.cfgTimePauseFan); end
 end
 
@@ -311,7 +311,12 @@ end
 
 
 function publishparams(x,s,Cfg,mqtt_client) 
-    
+      
+    if (Var.MqttStatusSend == false) and (mqtt_client.connected == true) then
+        mqtt_client:publish('Garage/status','CON', true)
+         Var.MqttStatusSend = true
+    end
+   
     s.Hcellar = publishnumparam(x.Hcellar, s.Hcellar, 0.1, mqtt_client, "Garage/Hcellar")
     s.HcellarA = publishnumparam(x.HcellarA, s.HcellarA, 0.1, mqtt_client, "Garage/HcellarA")
     s.Tcellar = publishnumparam(x.Tcellar, s.Tcellar, 0.1, mqtt_client, "Garage/Tcellar")
@@ -651,7 +656,7 @@ Param.Hpause = 0
 local error_message = nil
 -- ожидание окончания инициализации
 logger:error("Master cycle start wait")
-socket.sleep(1)
+socket.sleep(30)
 print("Master cycle init")
 logger:error("Master cycle init")
 -- Создание директории
@@ -779,7 +784,6 @@ while true do
   
   
   saveparms(Param)
-  publishparams(Param,SVar,Cfg,mqtt_client)
   t6 = socket.gettime()
   -- print("Heep is " .. collectgarbage("count"))
   -- collectgarbage("step",1000)
@@ -821,14 +825,25 @@ while true do
     end
  end
 
-
+ publishparams(Param,SVar,Cfg,mqtt_client)
 
  logger:debug(string.format("Time cycle : %.1f ms",(tend - tstart)*1000))
 
 
   Param.Tcycle = tend-tstart;
   if Param.Tcycle < 2.0 and Param.Tcycle >= 0 then
-    socket.sleep(2.0 - Param.Tcycle)
+    -- socket.sleep(2.0 - Param.Tcycle)
+    while ((socket.gettime()- tstart) < 2.0) do
+        socket.sleep(0.2)
+        if (mqtt_client.connected == true) then 
+            error_message = mqtt_client:handler()
+            if (error_message ~= nil) then
+                print("MQTT " .. error_message)
+                logger:error("MQTT " .. error_message)
+            end
+            publishparams(Param,SVar,Cfg,mqtt_client)
+        end
+    end
   else
     socket.sleep(2.0)
   end

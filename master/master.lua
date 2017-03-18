@@ -609,7 +609,7 @@ function Rule11()
  if (not Param.Fan) or (Param.Fan ~= 1) or (not Var.TimerCycleStart) then return; end
  if (not Param.Hcellar) or (not Cfg.Hstop) then return; end
  local tm = socket.gettime() - Var.TimerCycleStart
- if tm >= Param.TimeCycleFan then
+ if tm >= Cfg.TimeCycleFan then
     local rt, status
     rt,status = pcall(setgpio, GPIO_FAN, GPIO_FAN_OFF)
     if not rt then logger:warn("Error set gpio Fan: %s",status); end
@@ -620,7 +620,7 @@ function Rule11()
     logger:debug("Stop Fan cycle (timeout) Hcellar=" .. Param.Hcellar)
  else
    -- занести остаток секунд в переменную
-   tm = Param.TimeCycleFan - tm
+   tm = Cfg.TimeCycleFan - tm
    tm = tm - tm%0.1
    Param.Hcycle = tm
  end
@@ -629,13 +629,13 @@ end
 function Rule12()
   if not Var.TimerPauseStart then return; end
   local tm = socket.gettime() - Var.TimerPauseStart
-  if tm >= Param.TimeCycleFan then
+  if tm >= Cfg.TimePauseFan then
     Param.Hpause = 0
     Var.TimerPauseStart = nil
     logger:debug("End Pause Fan ")
   else
    -- занести остаток секунд в переменную
-   tm = Param.TimeCycleFan - tm
+   tm = Cfg.TimePauseFan - tm
    tm = tm - tm%0.1
    Param.Hpause = tm
   end
@@ -656,7 +656,7 @@ Param.Hpause = 0
 local error_message = nil
 -- ожидание окончания инициализации
 logger:error("Master cycle start wait")
-socket.sleep(30)
+socket.sleep(45)
 print("Master cycle init")
 logger:error("Master cycle init")
 -- Создание директории
@@ -805,6 +805,7 @@ while true do
      if (error_message ~= nil) then
         print("MQTT " .. error_message)
         logger:error("MQTT " .. error_message)
+        publishparams(Param,SVar,Cfg,mqtt_client)
      end
  else
     local tm
@@ -825,7 +826,6 @@ while true do
     end
  end
 
- publishparams(Param,SVar,Cfg,mqtt_client)
 
  logger:debug(string.format("Time cycle : %.1f ms",(tend - tstart)*1000))
 

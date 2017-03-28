@@ -20,19 +20,16 @@ TIME_PAUSE_FAN = 300
 TIN_CYCLE_TIME = 60
 
 -- mqtt 
-MQTT_HOST = '10.1.51.45'
-MQTT_USER = 'server'
-MQTT_PASSWORD = 'XXXXXX'
 MQTT_RECONECT_TIME = 60
 MQTT_SUBCRIBE_TOPICS = { 'Garage/cmd/#' }
--- функция логов
 
+require "private"
+
+-- функция логов
 local logger = logging.rolling_file("/var/log/masterlua.log", 1024*100, 5)
 
 
 -- работа с MQTT
-
-
 function callback(
     topic,    -- string
     message)  -- string
@@ -580,6 +577,10 @@ function Rule9()
   if (not Param.Hcellar) or (not Cfg.Hstart) then return; end
   -- проверка абс. влажности
   if Param.HcellarA and Param.HgarageA and (Param.HcellarA <= Param.HgarageA) then return; end
+  -- проверка на выпадение рассы
+  if Param.HcellarA and Param.HgarageAC then
+    if (Param.HcellarA > Param.HgarageAC) then return; end 
+  end
   -- проверка влажности
   if Param.Hcellar > Cfg.Hstart then
     local rt, status
@@ -761,6 +762,15 @@ while true do
     Param.HgarageA = e / ((273.15 + t) * 100.00 * 0.08314)
   else
     Param.HgarageA = nil
+  end
+  if Param.HcellarA and Param.Tgarage then
+    local t = tonumber(Param.Tgarage)
+    local h = 100.0	
+    local x = 17.67 * t/(243.5 + t)
+    local e = 6.112 * math.exp(x) * h * 18.02
+    Param.HgarageAC = e / ((273.15 + t) * 100.00 * 0.08314)
+  else
+    Param.HgarageAC = nil
   end
 
   
